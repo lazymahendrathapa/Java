@@ -145,7 +145,6 @@ private int noOfTimeClassNegativeOccur;
 private int noOfTimeClassNeutralOccur;
 private int totalClassOfTrainingSet;
 
-    
 private HashMap<String, Integer> positiveVocabulary = new HashMap<String, Integer>();
 private HashMap<String, Integer> negativeVocabulary = new HashMap<String, Integer>();
 private HashMap<String, Integer> neutralVocabulary = new HashMap<String, Integer>();
@@ -157,6 +156,7 @@ private int totalPositiveVocabulary = 0;
 private int totalNegativeVocabulary = 0;
 private int totalNeutralVocabulary = 0;
 
+//to hold the result of per word probability
 private HashMap<String, Float> positiveWordProbability = new HashMap<String,Float>();
 private HashMap<String, Float> negativeWordProbability = new HashMap<String,Float>();
 private HashMap<String, Float> neutralWordProbability = new HashMap<String,Float>();
@@ -249,16 +249,46 @@ private float probOfNeutral;
              System.out.println();
 
         }
-
+       
         private void calculateConditionalProbabilites()
         {
               calculateProblility(positiveVocabulary, positiveWordProbability, totalPositiveVocabulary );
               calculateProblility(negativeVocabulary, negativeWordProbability, totalNegativeVocabulary);
               calculateProblility(neutralVocabulary, neutralWordProbability, totalNeutralVocabulary);
-      
-              getResult(positiveWordProbability.entrySet());
-              getResult(negativeWordProbability.entrySet());
-              getResult(neutralWordProbability.entrySet());
+        }
+
+        public void getResult(DataSet testDataSet)
+        {
+
+            HashMap<String, Integer> testVocabulary = new HashMap<String, Integer>();
+           
+            testVocabulary = testDataSet.getVocabulary();
+
+              float p1 = probOfPositive;
+              float p2 = probOfNegative;
+              float p3 = probOfNeutral;
+
+
+            Set<Map.Entry<String, Integer>> set = testVocabulary.entrySet();
+
+
+             for(Map.Entry<String , Integer> me : set)
+              {
+
+                      p1 *= Math.pow(positiveWordProbability.get(me.getKey()),me.getValue());
+                      p2 *= Math.pow(negativeWordProbability.get(me.getKey()),me.getValue());
+                      p3 *= Math.pow(neutralWordProbability.get(me.getKey()),me.getValue());
+                     
+              }
+
+             if(p1>p2 && p1>p3)
+                     System.out.println("Positive");
+        
+             else if(p2>p3)
+                    System.out.println("Negative");
+         
+             else
+                     System.out.println("Neutral");
 
         }
  
@@ -280,14 +310,19 @@ public class NaiveBayes
       String positiveData = read.readFile(positiveDataFile);
       String negativeData = read.readFile(negativeDataFile);
       String neutralData = read.readFile(neutralDataFile);
- 
+      String testData = read.readFile(testDataFile);
+
       //get vocabulary set
       DataSet positiveDataSet = new DataSet(positiveData);
       DataSet negativeDataSet = new DataSet(negativeData);
       DataSet neutralDataSet = new DataSet(neutralData);
- 
+      DataSet testDataSet = new DataSet(testData);
+
       //calculate probability
       Probability probability = new Probability(positiveDataSet, negativeDataSet, neutralDataSet);
+     
+      //find the result of test data
+      probability.getResult(testDataSet);
 
    }
 
