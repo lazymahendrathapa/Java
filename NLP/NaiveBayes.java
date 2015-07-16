@@ -6,11 +6,11 @@ class ReadFile
 {
 
     private String line;
-    private String data = "";
+    private String data;
 
     public String readFile(String filename)
     {
-
+         data = "";
         try
         {
             FileReader fileReader = new FileReader(filename);
@@ -36,40 +36,6 @@ class ReadFile
     }
 }
 
-class Probability
-{
-
-private int noOfTimeClassPositiveOccur;
-private int noOfTimeClassNegativeOccur;
-private int noOfTimeClassNeutralOccur;
-private int totalClassOfTrainingSet;
-
-private float probOfPositive;
-private float probOfNegative;
-private float probOfNeutral;
-
-
-        public void  setPriorsData(int noOfTimeClassPositiveOccur, int noOfTimeClassNegativeOccur, int noOfTimeClassNeutralOccur)
-        {
-               this.noOfTimeClassPositiveOccur = noOfTimeClassPositiveOccur;
-               this.noOfTimeClassNegativeOccur = noOfTimeClassNegativeOccur;
-               this.noOfTimeClassNeutralOccur = noOfTimeClassNeutralOccur;
-               this.totalClassOfTrainingSet = (noOfTimeClassPositiveOccur + noOfTimeClassNegativeOccur + noOfTimeClassNeutralOccur);
-
-               calculatePriors();
-
-        }
-
-        private void calculatePriors()
-        {
-            probOfPositive = (float)(noOfTimeClassPositiveOccur/totalClassOfTrainingSet);
-            probOfNegative = (float)(noOfTimeClassNegativeOccur/totalClassOfTrainingSet);
-            probOfNeutral = (float)(noOfTimeClassNeutralOccur/totalClassOfTrainingSet);
-           
-        }
-
-}
-
 class DataSet
 {
 
@@ -80,9 +46,18 @@ class DataSet
     //no of training data for the class   
     private int totalData = 0; 
 
+    public DataSet(String data)
+    {
+        setVocabulary(data);
+    }
     public HashMap<String, Integer> getVocabulary()
     {
            return vocabulary;
+    }
+
+    public int getTotaldata()
+    {
+         return totalData;
     }
 
     //get the list of words
@@ -155,10 +130,139 @@ class DataSet
           }
      }
 
-    displayVocabulary();
+//  displayVocabulary();
           
   }
 
+}
+
+
+class Probability
+{
+
+private int noOfTimeClassPositiveOccur;
+private int noOfTimeClassNegativeOccur;
+private int noOfTimeClassNeutralOccur;
+private int totalClassOfTrainingSet;
+
+    
+private HashMap<String, Integer> positiveVocabulary = new HashMap<String, Integer>();
+private HashMap<String, Integer> negativeVocabulary = new HashMap<String, Integer>();
+private HashMap<String, Integer> neutralVocabulary = new HashMap<String, Integer>();
+
+private Set<String> tempWordList = new HashSet<String>();
+
+private int totalVocabulary = 0;
+private int totalPositiveVocabulary = 0;
+private int totalNegativeVocabulary = 0;
+private int totalNeutralVocabulary = 0;
+
+private HashMap<String, Float> positiveWordProbability = new HashMap<String,Float>();
+private HashMap<String, Float> negativeWordProbability = new HashMap<String,Float>();
+private HashMap<String, Float> neutralWordProbability = new HashMap<String,Float>();
+
+private float probOfPositive;
+private float probOfNegative;
+private float probOfNeutral;
+
+        public Probability(DataSet positiveDataSet, DataSet negativeDataSet, DataSet neutralDataSet)
+        {
+            noOfTimeClassPositiveOccur = positiveDataSet.getTotaldata();
+            noOfTimeClassNegativeOccur = negativeDataSet.getTotaldata();
+            noOfTimeClassNeutralOccur = neutralDataSet.getTotaldata();
+
+            totalClassOfTrainingSet = noOfTimeClassPositiveOccur + noOfTimeClassNegativeOccur + noOfTimeClassNeutralOccur;
+
+            calculatePriors();
+
+            positiveVocabulary = positiveDataSet.getVocabulary();
+            negativeVocabulary = negativeDataSet.getVocabulary();
+            neutralVocabulary = neutralDataSet.getVocabulary();
+      
+            calculateTotalVocubulary();
+            calculateConditionalProbabilites();
+        }
+
+        private int getTotalVocabulary(Set<Map.Entry<String,Integer>> set )
+        {
+             int temp = 0;
+
+             for(Map.Entry<String , Integer> me : set)
+              {
+                   tempWordList.add(me.getKey());
+                   temp += me.getValue();
+              }
+
+             return temp;
+
+        }
+      
+        private void calculateTotalVocubulary()
+        {
+         
+          totalPositiveVocabulary = getTotalVocabulary(positiveVocabulary.entrySet());
+          totalNegativeVocabulary = getTotalVocabulary(negativeVocabulary.entrySet());
+          totalNeutralVocabulary = getTotalVocabulary(neutralVocabulary.entrySet());
+
+          totalVocabulary = tempWordList.size();    
+        
+        }
+        
+        private void calculatePriors()
+        {
+            probOfPositive = (float)noOfTimeClassPositiveOccur/totalClassOfTrainingSet;
+            probOfNegative = (float)noOfTimeClassNegativeOccur/totalClassOfTrainingSet;
+            probOfNeutral = (float)noOfTimeClassNeutralOccur/totalClassOfTrainingSet;
+           
+        }
+
+        private void calculateProblility(HashMap<String, Integer> vocabulary, HashMap<String, Float> wordProbability, int count)
+        {
+
+                for(String temp: tempWordList)
+                {
+                       if(vocabulary.containsKey(temp))
+                       {
+
+                            float value = (float)(vocabulary.get(temp) + 1 )/(count + totalVocabulary);
+                            wordProbability.put(temp, value);
+
+                       }
+                       else
+                       {
+                            
+                            float value = (float)1/(count + totalVocabulary);
+                            wordProbability.put(temp, value);
+
+                       }
+                }
+        }
+
+
+        private void getResult(Set<Map.Entry<String,Float>> set )
+        {
+
+             for(Map.Entry<String , Float> me : set)
+              {
+                     System.out.println(me.getKey() + "   " + me.getValue());
+              }
+             System.out.println();
+
+        }
+
+        private void calculateConditionalProbabilites()
+        {
+              calculateProblility(positiveVocabulary, positiveWordProbability, totalPositiveVocabulary );
+              calculateProblility(negativeVocabulary, negativeWordProbability, totalNegativeVocabulary);
+              calculateProblility(neutralVocabulary, neutralWordProbability, totalNeutralVocabulary);
+      
+              getResult(positiveWordProbability.entrySet());
+              getResult(negativeWordProbability.entrySet());
+              getResult(neutralWordProbability.entrySet());
+
+        }
+ 
+             
 }
 
 public class NaiveBayes
@@ -177,9 +281,13 @@ public class NaiveBayes
       String negativeData = read.readFile(negativeDataFile);
       String neutralData = read.readFile(neutralDataFile);
  
-
-      DataSet dataSet = new DataSet();
-      dataSet.setVocabulary(positiveData);
+      //get vocabulary set
+      DataSet positiveDataSet = new DataSet(positiveData);
+      DataSet negativeDataSet = new DataSet(negativeData);
+      DataSet neutralDataSet = new DataSet(neutralData);
+ 
+      //calculate probability
+      Probability probability = new Probability(positiveDataSet, negativeDataSet, neutralDataSet);
 
    }
 
