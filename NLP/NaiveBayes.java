@@ -320,7 +320,7 @@ public class NaiveBayes
 
       //calculate probability
       Probability probability = new Probability(positiveDataSet, negativeDataSet, neutralDataSet);
-     
+       
       //find the result of test data
       probability.getResult(testDataSet);
 
