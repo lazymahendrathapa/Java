@@ -125,6 +125,8 @@ class TermFrequency
     //to store the termFrequency
     //frequency of positive,negative,neutral
     private HashMap<String, LinkedList<Integer>> termFrequency = new HashMap<String,LinkedList<Integer>>();
+    private HashMap<String,Integer> documentFrequency = new HashMap<String,Integer>(); 
+    private HashMap<String,LinkedList<Double>> weight = new HashMap<String,LinkedList<Double>>();
 
     public TermFrequency(HashMap<String,Integer> positiveVocabulary ,HashMap<String,Integer> negativeVocabulary, HashMap<String,Integer> neutralVocabulary )
     {
@@ -134,6 +136,8 @@ class TermFrequency
       this.neutralVocabulary = neutralVocabulary;
 
       calculateTermFrequency();
+      calculateDocumentFrequency();
+      calculateWeight();
     }
 
     private void displayTermFrequency()
@@ -141,6 +145,30 @@ class TermFrequency
        Set<Map.Entry<String,LinkedList<Integer>>>  set = termFrequency.entrySet();
 
        for(Map.Entry<String,LinkedList<Integer>> me: set)
+       {
+            System.out.print(me.getKey() + ": ");
+            System.out.println(me.getValue());
+       }
+    }
+
+
+    private void displayDocumentFrequency()
+    {
+       Set<Map.Entry<String,Integer>> set = documentFrequency.entrySet();
+
+       for(Map.Entry<String,Integer> me: set)
+       {
+            System.out.print(me.getKey() + ": ");
+            System.out.println(me.getValue());
+       }
+    }
+
+    private void displayWeight()
+    {
+
+       Set<Map.Entry<String,LinkedList<Double>>>  set = weight.entrySet();
+
+       for(Map.Entry<String,LinkedList<Double>> me: set)
        {
             System.out.print(me.getKey() + ": ");
             System.out.println(me.getValue());
@@ -224,6 +252,52 @@ class TermFrequency
          putdata(neutralVocabulary,"neutral");
          displayTermFrequency();
     }
+
+    private void calculateDocumentFrequency()
+    {
+        Set<Map.Entry<String,LinkedList<Integer>>>  set = termFrequency.entrySet();
+ 
+        int count = 0;
+
+       for(Map.Entry<String,LinkedList<Integer>> me: set)
+       {
+             LinkedList<Integer> temp = termFrequency.get(me.getKey());
+
+             for( Integer value: temp)
+               if(value != 0)
+                   ++count;
+
+             documentFrequency.put(me.getKey(),count);
+             count = 0;
+       }        
+
+       displayDocumentFrequency();
+    }
+
+  private void calculateWeight()
+  {
+      Set<Map.Entry<String,LinkedList<Integer>>>  set = termFrequency.entrySet();
+
+       for(Map.Entry<String,LinkedList<Integer>> me: set)
+       {
+            LinkedList<Integer> temp = me.getValue();
+            LinkedList<Double> result = new LinkedList<Double>();
+
+            int documentValue = documentFrequency.get(me.getKey());
+
+             for(Integer value: temp)
+             {
+                if(value > 0)
+                    result.add((1+Math.log10((double)value)) * Math.log10(3/(double)documentValue));                           
+                else
+                    result.add((double)0.0);
+             }
+ 
+             weight.put(me.getKey(),result);
+       }
+
+       displayWeight();
+  }
 }
 
 public class Tfidfweight
