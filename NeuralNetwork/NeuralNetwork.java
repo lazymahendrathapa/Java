@@ -23,7 +23,9 @@ public class NeuralNetwork {
  
     // Inputs for xor problem
     final double inputs[][] = { { 1, 1 }, { 1, 0 }, { 0, 1 }, { 0, 0 } };
- 
+
+    //to testing data
+    double testSet[]={0,0}; 
     // Corresponding outputs, xor training data
     final double expectedOutputs[][] = { { 0 }, { 1 }, { 1 }, { 0 } };
     double resultOutputs[][] = { { -1 }, { -1 }, { -1 }, { -1 } }; // dummy init
@@ -37,6 +39,7 @@ public class NeuralNetwork {
         int maxRuns = 50000;
         double minErrorCondition = 0.001;
         nn.run(maxRuns, minErrorCondition);
+        nn.test();
     }
  
     public NeuralNetwork(int input, int hidden, int output) {
@@ -199,7 +202,21 @@ public class NeuralNetwork {
             }
         }
     }
- 
+
+    void test()
+    {
+
+        setInput(testSet);
+        activate();
+        double [] outputtest = getOutput();
+        
+        for(double temp : outputtest)
+        {
+          System.out.println(temp);  
+        }
+
+    }
+
     void run(int maxSteps, double minError) {
         int i;
         // Train neural network until minError reached or maxSteps exceeded
