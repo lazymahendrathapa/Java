@@ -23,6 +23,30 @@ public class synonyms
 
         while((line = bufferedReader.readLine()) != null)
         {
+
+
+            while(line.equals("Synonyms:"))
+             {
+
+                String temp = " ";
+                char t; 
+                while( (t =(char)bufferedReader.read()) != '.')
+                     temp += t;
+
+                bufferedWriter.write(temp); 
+                bufferedWriter.write('\n');
+
+                break;
+                   
+             }
+
+          
+           while(line.equals("*****"))
+            {
+             
+             line = bufferedReader.readLine();
+             line = bufferedReader.readLine();
+            
              int place = line.length();
 
              boolean flag = true;
@@ -40,12 +64,24 @@ public class synonyms
 
              if(flag)
              {
+                bufferedWriter.write('\n');
                 bufferedWriter.write(line); 
+                bufferedWriter.write('\n');
              }
 
-                     
+             break;
+            }
         }
 
+         bufferedReader = new BufferedReader(fileReader);
+
+         while((line = bufferedReader.readLine()) != null)
+         {
+            String temp = line.replace(',',' ');
+
+             bufferedWriter.write(line); 
+
+         }
 
         bufferedReader.close();
         bufferedWriter.close();

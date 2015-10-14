@@ -116,6 +116,7 @@ class DataSet
 
 }
 
+
 class TermFrequency
 {
     private HashMap<String,Integer>positiveVocabulary = new HashMap<String,Integer>();

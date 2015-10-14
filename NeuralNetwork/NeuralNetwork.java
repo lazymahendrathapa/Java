@@ -1,3 +1,4 @@
+import java.io.*;
 import java.text.*;
 import java.util.*;
  
@@ -6,8 +7,10 @@ public class NeuralNetwork {
         Locale.setDefault(Locale.ENGLISH);
     }
  
-    final boolean isTrained = false;
+    final boolean isTrained = true;
     final DecimalFormat df;
+    final DecimalFormat ef;
+
     final Random rand = new Random();
     final ArrayList<Neuron> inputLayer = new ArrayList<Neuron>();
     final ArrayList<Neuron> hiddenLayer = new ArrayList<Neuron>();
@@ -32,20 +35,22 @@ public class NeuralNetwork {
     double output[];
  
     // for weight update all
+
     final HashMap<String, Double> weightUpdate = new HashMap<String, Double>();
  
     public static void main(String[] args) {
         NeuralNetwork nn = new NeuralNetwork(2, 4, 1);
         int maxRuns = 50000;
         double minErrorCondition = 0.001;
-        nn.run(maxRuns, minErrorCondition);
+ //     nn.run(maxRuns, minErrorCondition);
         nn.test();
     }
  
     public NeuralNetwork(int input, int hidden, int output) {
         this.layers = new int[] { input, hidden, output };
-        df = new DecimalFormat("#.0#");
- 
+        df = new DecimalFormat("#0.000#");
+        ef = new DecimalFormat("#");
+
         /**
          * Create all neurons and connections Connections are created in the
          * neuron class
@@ -302,31 +307,59 @@ public class NeuralNetwork {
             }
         }
     }
- 
+
+
     // trained data
     void trainedWeights() {
+    
         weightUpdate.clear();
-         
-        weightUpdate.put(weightKey(3, 0), 1.03);
-        weightUpdate.put(weightKey(3, 1), 1.13);
-        weightUpdate.put(weightKey(3, 2), -.97);
-        weightUpdate.put(weightKey(4, 3), 7.24);
-        weightUpdate.put(weightKey(4, 4), -3.71);
-        weightUpdate.put(weightKey(4, 5), -.51);
-        weightUpdate.put(weightKey(5, 6), -3.28);
-        weightUpdate.put(weightKey(5, 7), 7.29);
-        weightUpdate.put(weightKey(5, 8), -.05);
-        weightUpdate.put(weightKey(6, 9), 5.86);
-        weightUpdate.put(weightKey(6, 10), 6.03);
-        weightUpdate.put(weightKey(6, 11), .71);
-        weightUpdate.put(weightKey(7, 12), 2.19);
-        weightUpdate.put(weightKey(7, 13), -8.82);
-        weightUpdate.put(weightKey(7, 14), -8.84);
-        weightUpdate.put(weightKey(7, 15), 11.81);
-        weightUpdate.put(weightKey(7, 16), .44);
+
+
+        try
+        {
+
+        String line;
+       
+        FileReader fileReader = new FileReader("WeightFile.txt");
+
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        while((line = bufferedReader.readLine()) != null)
+        {
+
+              String[] lineSplit = line.split(" ");
+
+              weightUpdate.put(weightKey(Integer.parseInt(lineSplit[0]), Integer.parseInt(lineSplit[1])), Double.parseDouble(lineSplit[2]));
+        
+        }
+
+        bufferedReader.close();
+
+        }
+        catch(FileNotFoundException ex)
+        {
+            System.out.println("File Reading Error");
+        }
+        catch(IOException ex)
+        {
+              
+               System.out.println("Error reading to file ");
+
+        }
+
     }
  
     public void printWeightUpdate() {
+
+       String fileName = "WeightFile.txt";
+               try
+       {
+
+       FileWriter fileWriter = new FileWriter(fileName);
+
+       BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+
         System.out.println("printWeightUpdate, put this i trainedWeights() and set isTrained to true");
         // weights for the hidden layer
         for (Neuron n : hiddenLayer) {
@@ -335,6 +368,13 @@ public class NeuralNetwork {
                 String w = df.format(con.getWeight());
                 System.out.println("weightUpdate.put(weightKey(" + n.id + ", "
                         + con.id + "), " + w + ");");
+              
+                bufferedWriter.write(ef.format(n.id));
+                bufferedWriter.write(" ");
+                bufferedWriter.write(ef.format(con.id));
+                bufferedWriter.write(" ");
+                bufferedWriter.write(w);
+                bufferedWriter.newLine();
             }
         }
         // weights for the output layer
@@ -344,9 +384,23 @@ public class NeuralNetwork {
                 String w = df.format(con.getWeight());
                 System.out.println("weightUpdate.put(weightKey(" + n.id + ", "
                         + con.id + "), " + w + ");");
+           
+                bufferedWriter.write(ef.format(n.id));
+                bufferedWriter.write(" ");
+                bufferedWriter.write(ef.format(con.id));
+                bufferedWriter.write(" ");
+                bufferedWriter.write(w);
+                bufferedWriter.newLine();
             }
         }
         System.out.println();
+            bufferedWriter.close(); 
+        }
+       catch(IOException ex)
+       {
+          
+               System.out.println("Error writing to file " + fileName );
+       }
     }
  
     public void printAllWeights() {

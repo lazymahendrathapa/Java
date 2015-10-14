@@ -1,10 +1,10 @@
 import java.text.*;
+import java.io.*;
 import java.util.*;
 import java.lang.*;
 
 class Classifier 
 {
-     DecimalFormat df;
      Random rand = new Random();
      ArrayList<Neuron> inputLayer = new ArrayList<Neuron>();
      ArrayList<Neuron> hiddenLayer = new ArrayList<Neuron>();
